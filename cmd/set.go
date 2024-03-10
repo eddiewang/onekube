@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -39,15 +40,21 @@ var setCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		config, err := client.ReadItemField(item.Vault.ID, item.ID, "config")
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
 		kubeConfigFile := funcs.GetKubeConfigFilePath(itemName)
 
-		err = os.WriteFile(kubeConfigFile, []byte(config), 0644)
+		if _, err := os.Stat(kubeConfigFile); errors.Is(err, os.ErrNotExist) {
+			config, err := client.ReadItemField(item.Vault.ID, item.ID, "config")
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			err = os.WriteFile(kubeConfigFile, []byte(config), 0644)
+
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
 
 		if err != nil {
 			log.Fatal(err)
@@ -55,7 +62,6 @@ var setCmd = &cobra.Command{
 
 		fmt.Printf("export KUBECONFIG=%s\n", kubeConfigFile)
 	},
-	// Untested
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) != 0 {
 			return nil, cobra.ShellCompDirectiveNoFileComp
