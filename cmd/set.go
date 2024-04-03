@@ -41,16 +41,18 @@ var setCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		kubeConfigFile := config.GetKubeConfigFilePath(itemName)
+		kubeConfigFile := config.GetCachedKubeConfigFilePath(itemName)
 
 		if _, err := os.Stat(kubeConfigFile); errors.Is(err, os.ErrNotExist) {
-			config, err := client.ReadItemField(item.Vault.ID, item.ID, "config")
+			rawKubeConfig, err := client.ReadItemField(item.Vault.ID, item.ID, "config")
 
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			err = os.WriteFile(kubeConfigFile, []byte(config), 0644)
+			updatedKubeConfig := fmt.Sprintf("# Managed by onekube\n%s", rawKubeConfig)
+
+			err = os.WriteFile(kubeConfigFile, []byte(updatedKubeConfig), 0644)
 
 			if err != nil {
 				log.Fatal(err)
@@ -61,7 +63,13 @@ var setCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		fmt.Printf("export KUBECONFIG=%s\n", kubeConfigFile)
+		err = config.BackupNonOneKubeConfig()
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		config.CopyKubeConfig(kubeConfigFile)
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) != 0 {

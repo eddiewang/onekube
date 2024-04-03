@@ -21,6 +21,7 @@ var listCmd = &cobra.Command{
 	Long: `Lists available configs from 1password currently stored locally.
 Force the update to re-check what's available in 1password`,
 	Run: func(cmd *cobra.Command, args []string) {
+
 		client := onepassword.NewOpClient()
 
 		allConfigItems, err := items.Load(client, Force)

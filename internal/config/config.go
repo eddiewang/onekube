@@ -10,16 +10,16 @@ import (
 	"github.com/iancoleman/strcase"
 )
 
-func GetKubeConfigFilePath(name string) string {
-	configDirectory := getConfigDirectory()
+func GetCachedKubeConfigFilePath(name string) string {
+	configDirectory := getOneKubeConfigDirectory()
 	return filepath.Join(configDirectory, strcase.ToKebab(name))
 }
 
 func Clean() {
-	os.RemoveAll(getConfigDirectory())
+	os.RemoveAll(getOneKubeConfigDirectory())
 }
 
-func getConfigDirectory() string {
+func getOneKubeConfigDirectory() string {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		log.Fatal(err)
@@ -28,13 +28,13 @@ func getConfigDirectory() string {
 	return filepath.Join(home, ".config", "onekube")
 }
 
-func getConfigFilePath() string {
-	configDirectory := getConfigDirectory()
+func getOneKubeConfigFilePath() string {
+	configDirectory := getOneKubeConfigDirectory()
 	return filepath.Join(configDirectory, "configs")
 }
 
 func Read() ([]onepassword.Item, error) {
-	itemsJson, err := os.ReadFile(getConfigFilePath())
+	itemsJson, err := os.ReadFile(getOneKubeConfigFilePath())
 
 	if err != nil {
 		return nil, err
@@ -55,7 +55,7 @@ func Read() ([]onepassword.Item, error) {
 func Write(items []onepassword.Item) error {
 	itemsJson, _ := json.Marshal(items)
 
-	err := os.WriteFile(getConfigFilePath(), []byte(itemsJson), 0644)
+	err := os.WriteFile(getOneKubeConfigFilePath(), []byte(itemsJson), 0644)
 
 	if err != nil {
 		log.Fatal(err)
@@ -65,7 +65,7 @@ func Write(items []onepassword.Item) error {
 }
 
 func EnsureDirectoryExists() error {
-	configDirectory := getConfigDirectory()
+	configDirectory := getOneKubeConfigDirectory()
 
 	err := os.MkdirAll(configDirectory, os.ModePerm)
 
