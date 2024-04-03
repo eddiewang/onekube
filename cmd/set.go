@@ -6,8 +6,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/eddymoulton/onekube/internal/funcs"
-	"github.com/eddymoulton/onekube/onepassword"
+	"github.com/eddymoulton/onekube/internal/config"
+	"github.com/eddymoulton/onekube/internal/items"
+	"github.com/eddymoulton/onekube/internal/onepassword"
 	"github.com/spf13/cobra"
 )
 
@@ -18,7 +19,7 @@ var setCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		client := onepassword.NewOpClient()
 
-		items, err := funcs.LoadItems(client, false)
+		allConfigItems, err := items.Load(client, false)
 
 		if err != nil {
 			log.Fatal(err)
@@ -34,13 +35,13 @@ var setCmd = &cobra.Command{
 
 		itemName := args[0]
 
-		item, err := funcs.FindItem(items, itemName)
+		item, err := items.Find(allConfigItems, itemName)
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		kubeConfigFile := funcs.GetKubeConfigFilePath(itemName)
+		kubeConfigFile := config.GetKubeConfigFilePath(itemName)
 
 		if _, err := os.Stat(kubeConfigFile); errors.Is(err, os.ErrNotExist) {
 			config, err := client.ReadItemField(item.Vault.ID, item.ID, "config")
@@ -68,7 +69,7 @@ var setCmd = &cobra.Command{
 		}
 
 		client := onepassword.NewOpClient()
-		items, err := funcs.LoadItems(client, false)
+		items, err := items.Load(client, false)
 
 		if err != nil {
 			log.Fatal(err)

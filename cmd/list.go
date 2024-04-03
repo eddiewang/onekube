@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/eddymoulton/onekube/internal/funcs"
-	"github.com/eddymoulton/onekube/onepassword"
+	"github.com/eddymoulton/onekube/internal/items"
+	"github.com/eddymoulton/onekube/internal/onepassword"
 	"github.com/spf13/cobra"
 )
 
@@ -23,13 +23,13 @@ Force the update to re-check what's available in 1password`,
 	Run: func(cmd *cobra.Command, args []string) {
 		client := onepassword.NewOpClient()
 
-		items, err := funcs.LoadItems(client, Force)
+		allConfigItems, err := items.Load(client, Force)
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		for _, item := range items {
+		for _, item := range allConfigItems {
 			fmt.Println(item.Title)
 		}
 	},

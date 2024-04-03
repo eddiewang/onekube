@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/eddymoulton/onekube/internal/funcs"
+	"github.com/eddymoulton/onekube/internal/config"
 	"github.com/spf13/cobra"
 )
 
@@ -10,7 +10,7 @@ var cleanCmd = &cobra.Command{
 	Short: "Deletes all data created by onekube",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		funcs.CleanData()
+		config.Clean()
 	},
 }
 

@@ -1,13 +1,12 @@
-package funcs
+package config
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 
-	"github.com/eddymoulton/onekube/onepassword"
+	"github.com/eddymoulton/onekube/internal/onepassword"
 	"github.com/iancoleman/strcase"
 )
 
@@ -16,33 +15,7 @@ func GetKubeConfigFilePath(name string) string {
 	return filepath.Join(configDirectory, strcase.ToKebab(name))
 }
 
-func LoadItems(client *onepassword.Client, forceReload bool) ([]onepassword.Item, error) {
-	items, err := readConfig()
-
-	if err != nil || forceReload {
-		items, err = loadItemsFromSource(client)
-
-		if err != nil {
-			log.Fatal(err)
-			return nil, err
-		}
-	}
-
-	return items, err
-}
-
-func FindItem(items []onepassword.Item, title string) (onepassword.Item, error) {
-
-	for _, item := range items {
-		if item.Title == title {
-			return item, nil
-		}
-	}
-
-	return onepassword.Item{}, fmt.Errorf("configuration for '%s' not found", title)
-}
-
-func CleanData() {
+func Clean() {
 	os.RemoveAll(getConfigDirectory())
 }
 
@@ -60,7 +33,7 @@ func getConfigFilePath() string {
 	return filepath.Join(configDirectory, "configs")
 }
 
-func readConfig() ([]onepassword.Item, error) {
+func Read() ([]onepassword.Item, error) {
 	itemsJson, err := os.ReadFile(getConfigFilePath())
 
 	if err != nil {
@@ -79,7 +52,7 @@ func readConfig() ([]onepassword.Item, error) {
 	return items, nil
 }
 
-func writeConfig(items []onepassword.Item) error {
+func Write(items []onepassword.Item) error {
 	itemsJson, _ := json.Marshal(items)
 
 	err := os.WriteFile(getConfigFilePath(), []byte(itemsJson), 0644)
@@ -91,7 +64,7 @@ func writeConfig(items []onepassword.Item) error {
 	return err
 }
 
-func ensureConfigDirectoryExists() error {
+func EnsureDirectoryExists() error {
 	configDirectory := getConfigDirectory()
 
 	err := os.MkdirAll(configDirectory, os.ModePerm)
@@ -101,24 +74,4 @@ func ensureConfigDirectoryExists() error {
 	}
 
 	return err
-}
-
-func loadItemsFromSource(client *onepassword.Client) ([]onepassword.Item, error) {
-	items, _ := client.Items("kubeconfig")
-
-	err := ensureConfigDirectoryExists()
-
-	if err != nil {
-		log.Fatal(err)
-		return nil, err
-	}
-
-	err = writeConfig(items)
-
-	if err != nil {
-		log.Fatal(err)
-		return nil, err
-	}
-
-	return items, nil
 }

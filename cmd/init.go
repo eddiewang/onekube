@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	"github.com/eddymoulton/onekube/internal/funcs"
-	"github.com/eddymoulton/onekube/onepassword"
+	"github.com/eddymoulton/onekube/internal/config"
+	"github.com/eddymoulton/onekube/internal/items"
+	"github.com/eddymoulton/onekube/internal/onepassword"
 	"github.com/spf13/cobra"
 )
 
@@ -14,8 +15,8 @@ var initCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		client := onepassword.NewOpClient()
 
-		funcs.CleanData()
-		funcs.LoadItems(client, true)
+		config.Clean()
+		items.Load(client, true)
 	},
 }
 
