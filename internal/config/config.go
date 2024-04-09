@@ -17,6 +17,7 @@ func GetCachedKubeConfigFilePath(name string) string {
 
 func Clean() {
 	os.RemoveAll(getOneKubeConfigDirectory())
+	RestoreNonOneKubeConfig()
 }
 
 func getOneKubeConfigDirectory() string {

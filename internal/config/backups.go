@@ -37,7 +37,6 @@ func BackupNonOneKubeConfig() error {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	// optionally, resize scanner's capacity for lines over 64K, see next example
 	for scanner.Scan() {
 		line := scanner.Text()
 		if line == "# Managed by onekube" {
@@ -57,8 +56,27 @@ func BackupNonOneKubeConfig() error {
 	return err
 }
 
+func RestoreNonOneKubeConfig() error {
+	kubeconfigPath, err := kubeconfigPath()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	backupFilePath := fmt.Sprintf("%s-onekube-backup", kubeconfigPath)
+
+	if _, err := os.Stat(backupFilePath); errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+
+	_, err = copyFile(backupFilePath, kubeconfigPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return os.Remove(backupFilePath)
+}
+
 func kubeconfigPath() (string, error) {
-	// KUBECONFIG env var
 	if v := os.Getenv("KUBECONFIG"); v != "" {
 		list := filepath.SplitList(v)
 		if len(list) > 1 {
@@ -68,7 +86,6 @@ func kubeconfigPath() (string, error) {
 		return v, nil
 	}
 
-	// default path
 	home := os.Getenv("HOME")
 	if home == "" {
 		return "", errors.New("HOME environment variable not set")
