@@ -63,6 +63,9 @@ or
 onekube clean
 ```
 
+> [!WARNING]
+> Any kubeconfig files set will be stored on your local machine until replaced with another, or `onekube clean` is run
+
 ## Dependencies
 
 - The [1password CLI](https://developer.1password.com/docs/cli) must be installed and logged in
