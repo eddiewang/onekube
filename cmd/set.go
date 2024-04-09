@@ -70,6 +70,7 @@ var setCmd = &cobra.Command{
 		}
 
 		config.CopyKubeConfig(kubeConfigFile)
+		os.Remove(kubeConfigFile)
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) != 0 {
